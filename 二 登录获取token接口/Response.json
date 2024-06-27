@@ -1,0 +1,11 @@
+{
+    "Message":"ok",
+    "RequestId":"bab123a12345a12d",
+    "Data":{
+       "Url":"http://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg",
+       "SslUrl":"https://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg",
+       "RmUrl":"http://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg",
+       "SslRmUrl":"https://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg"
+    },
+    "Code":200
+ }
