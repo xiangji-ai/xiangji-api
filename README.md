@@ -147,7 +147,7 @@ payload = {
 result = requests.get(request_url, data=payload).json()
 ```
 
-#### 2.5 完整返回参数的真实实例
+#### 2.5 返回例子
 ```
 {
     "Message":"ok",
@@ -230,7 +230,7 @@ payload = {
 result=requests.post(request_url, data=payload).json()
 ```
 
-#### 3.5 完整返回参数的真实实例:
+#### 3.5 返回例子
 ```
 {
    "code":"0",
@@ -307,7 +307,7 @@ payload = {
 result=requests.get(request_url, data=payload).json()
 ```
 
-#### 4.5  完整返回参数的真实实例:
+#### 4.5 返回例子
 ```
 {
    "Message":"ok",
@@ -322,11 +322,230 @@ result=requests.get(request_url, data=payload).json()
 }
 ```
 
+### 5A 图片URL请求图片翻译接口 (单次)
+
+#### 5A.1 访问接口
+- 请求地址: http://api.tosoiot.com
+- 请求类型: GET
+
+#### 5A.2 请求参数
+
+| 字段名称           | 是否必选 | 类型      | 示例值                               | 描述                                                                |   |   |
+|----------------|------|---------|-----------------------------------|-------------------------------------------------------------------|---|---|
+| Action         | 是    | String  | GetImageTranslate                 | 服务类型，GetImageTranslate 指“图⽚翻译”服务                                  |   |   |
+| SourceLanguage | 是    | String  | CHS                               | "来源语⾔，支持 中文(CHS/CHT)、英(ENG)                                       |   |   |
+| 参考[语言列表]"      |      |         |                                   |                                                                   |   |   |
+| TargetLanguage | 是    | String  | KOR                               | "目标语言                                                             |   |   |
+| 参考[语言列表]"      |      |         |                                   |                                                                   |   |   |
+| Url            | 是    | String  | https://img.xx.com/O107064055.jpg | 图⽚地址，注 ：文中url参数在传递时需要进行urlencode                                  |   |   |
+| ImgTransKey    | 是    | String  | 1234567890                        | "图⽚翻译服务标识码                                                        |   |   |
+| 参照[访问控制]"      |      |         |                                   |                                                                   |   |   |
+| CommitTime     | 是    | String  | 1653229753                        | 秒级时间戳                                                             |   |   |
+| Sign           | 是    | String  | 044a0bdea4128bb46aa59214ca821d6b  | 签名， 签名⽅法: md5(CommitTime + "_" + UserKey + "_" + ImgTransKey) 小写  |   |   |
+| NeedWatermark  | 否    | Integer | 0                                 | （非必需字段）是否添加水印，1=添加，0=不添加，默认为 1。需在 Web 端配置水印模板，否则不添加               |   |   |
+| NeedRmUrl      | 否    | Integer | 1                                 | （非必需字段）是否返回去文字图片链接。1=返回去文字图片链接，其它或无此字段，则不返回去文字图片链接                |   |   |
+| Qos            | 否    | String  | LowLatency                        | （非必需字段）翻译速度与翻译质量的偏好选项。LowLatency=偏好速度而牺牲质量 ，BestQuality=偏好图片翻译的质量 |   |   |
+|                |      |         |                                   |                                                                   |   |   |
+
+NeedWatermark 设置为 1，则需要在网站账户后台配置好水印设置。 
+
+#### 5A.3 返回参数
+
+| 字段名称       | 类型      | 示例值                                                 | 描述                                     |
+|------------|---------|-----------------------------------------------------|----------------------------------------|
+| Code       | Integer | 200                                                 | 状态码（详细列表见文末），200 代表正常                  |
+| Message    | String  | ok                                                  | 状态码的明文含义，正常                            |
+| RequestId  | String  | 4f93f79edff764a7                                    | 请求的唯一 id                               |
+| Data       | Json    |                                                     | 返回数据的 json 内容                          |
+| -- Url     | String  | http://i.tosoiot.com/r/5b135a6003a3075d/f-xxxx.jpg  | 翻译后的目标图片地址（图片地址的默认有效期为80天，如需长时存储请联系客服） |
+| -- SsUrl   | String  | https://i.tosoiot.com/r/5b135a6003a3075d/f-xxxx.jpg | 翻译后的目标图片 https 地址                      |
+| -- RmUrl   | String  | http://i.tosoiot.com/r/5b135a6003a3075d/ixx-xx.jpg  | 去除文字后的目标图片地址                           |
+| -- SsRmUrl | String  | https://i.tosoiot.com/r/5b135a6003a3075d/i-xxxx.jpg | 去除文字后的目标图片 https 地址                    |
+
+#### 5A.4 示例代码
+##### Python 
+```
+import requests
+import hashlib
+import time
+
+USER_KEY = "YOUR USER KEY"
+IMG_TRANS_KEY = "YOUR IMG TRANS KEY"  # 
+request_url="http://api.tosoiot.com"
+
+def calc_sign(commit_time) -> str:
+    # 签名⽅法: md5(CommitTime + "_" + UserKey + "_" + ImgTransKey) 小写
+    str_to_sign = "{}_{}_{}".format(commit_time, USER_KEY, IMG_TRANS_KEY)
+    _sign = hashlib.md5(str_to_sign.encode('utf-8')).hexdigest()
+    return _sign
+
+commit_time = int(time.time())
+sign = calc_sign(commit_time)
+
+payload = {
+    "Action": "GetImageTranslate",
+    "SourceLanguage": "CHS",
+    "TargetLanguage": "ENG",
+    "Url": "https://img2.baidu.com/it/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=676",
+    "ImgTransKey": IMG_TRANS_KEY,
+    "CommitTime": commit_time,
+    "Sign": sign,
+    "NeedWatermark": 0,
+    "NeedRmUrl": 1,
+    "Qos": "LowLatency"
+}
+
+result = requests.get(request_url, data=payload).json()
+```
+
+#### 5A.5 返回例子
+```
+{
+   "Message":"ok",
+   "RequestId":"bab123a12345a12d",
+   "Data":{
+      "Url":"http://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg",
+      "SslUrl":"https://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg",
+      "RmUrl":"http://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg",
+      "SslRmUrl":"https://i.tosoiot.com/bab123a12345a12d/20240426-15-3126-9cfb/u=3536397260,2925037283&fm=253&fmt=auto&app=138&f=JPEG-f.jpg"
+   },
+   "Code":200
+}
+```
+
+### 5B. 图片翻译文件请求方式 (file-base64)
+
+#### 5B.1 访问接口
+- 请求地址: http://api2.tosoiot.com
+- 请求类型: POST
+
+#### 5B.2 请求参数
+本地图片文件 POST 请求，支持文件 base64 格式或文件流
+- base64 格式需添加form-data，Key 为file-base64，Value 为图片文件 base64 编码；
+- 文件流格式需添加form-data，Key 为file-stream，Value 为图片文件数据流；
+
+| 字段名称           | 是否必选 | 类型      | 示例值                               | 描述                                                                |   |   |
+|----------------|------|---------|-----------------------------------|-------------------------------------------------------------------|---|---|
+| Action         | 是    | String  | GetImageTranslate                 | 服务类型，GetImageTranslate 指“图⽚翻译”服务                                  |   |   |
+| SourceLanguage | 是    | String  | CHS                               | "来源语⾔，支持 中文(CHS/CHT)、英(ENG)                                       |   |   |
+| 参考[语言列表]"      |      |         |                                   |                                                                   |   |   |
+| TargetLanguage | 是    | String  | KOR                               | "目标语言                                                             |   |   |
+| 参考[语言列表]"      |      |         |                                   |                                                                   |   |   |
+| Url            | 是    | String  | https://img.xx.com/O107064055.jpg | 图⽚地址，注 ：文中url参数在传递时需要进行urlencode                                  |   |   |
+| ImgTransKey    | 是    | String  | 1234567890                        | "图⽚翻译服务标识码                                                        |   |   |
+| 参照[访问控制]"      |      |         |                                   |                                                                   |   |   |
+| CommitTime     | 是    | String  | 1653229753                        | 秒级时间戳                                                             |   |   |
+| Sign           | 是    | String  | 044a0bdea4128bb46aa59214ca821d6b  | 签名， 签名⽅法: md5(CommitTime + "_" + UserKey + "_" + ImgTransKey) 小写  |   |   |
+| NeedWatermark  | 否    | Integer | 0                                 | （非必需字段）是否添加水印，1=添加，0=不添加，默认为 1。需在 Web 端配置水印模板，否则不添加               |   |   |
+| NeedRmUrl      | 否    | Integer | 1                                 | （非必需字段）是否返回去文字图片链接。1=返回去文字图片链接，其它或无此字段，则不返回去文字图片链接                |   |   |
+| Qos            | 否    | String  | LowLatency                        | （非必需字段）翻译速度与翻译质量的偏好选项。LowLatency=偏好速度而牺牲质量 ，BestQuality=偏好图片翻译的质量 |   |   |
+|                |      |         |                                   |                                                                   |   |   |
+
+
+#### 5B.3 返回参数
+| 字段名称       | 类型      | 示例值                                                 | 描述                                     |
+|------------|---------|-----------------------------------------------------|----------------------------------------|
+| Code       | Integer | 200                                                 | 状态码（详细列表见文末），200 代表正常                  |
+| Message    | String  | ok                                                  | 状态码的明文含义，正常                            |
+| RequestId  | String  | 4f93f79edff764a7                                    | 请求的唯一 id                               |
+| Data       | Json    |                                                     | 返回数据的 json 内容                          |
+| -- Url     | String  | http://i.tosoiot.com/r/5b135a6003a3075d/f-xxxx.jpg  | 翻译后的目标图片地址（图片地址的默认有效期为80天，如需长时存储请联系客服） |
+| -- SsUrl   | String  | https://i.tosoiot.com/r/5b135a6003a3075d/f-xxxx.jpg | 翻译后的目标图片 https 地址                      |
+| -- RmUrl   | String  | http://i.tosoiot.com/r/5b135a6003a3075d/ixx-xx.jpg  | 去除文字后的目标图片地址                           |
+| -- SsRmUrl | String  | https://i.tosoiot.com/r/5b135a6003a3075d/i-xxxx.jpg | 去除文字后的目标图片 https 地址                    |
+
+#### 5B.4 示例代码
+#### Python
+```
+import os
+import requests
+import hashlib
+import time
+import base64
+import argparse
+
+USER_KEY = "YOUR USER KEY"
+IMG_TRANS_KEY = "YOUR IMAGE TRANS KEY"
+
+request_url = "http://api2.tosoiot.com"
+
+def calc_sign(commit_time: int) -> str:
+    # 签名⽅法: md5(CommitTime + "_" + UserKey + "_" + ImgTransKey) 小写
+    str_to_sign = "{}_{}_{}".format(commit_time, USER_KEY, IMG_TRANS_KEY)
+    _sign = hashlib.md5(str_to_sign.encode('utf-8')).hexdigest()
+    return _sign
+
+def translate_local_image(image_filepath: str, mode: str):
+    commit_time = int(time.time())
+    sign = calc_sign(commit_time)
+
+    payload = {
+        "Action": "GetImageTranslate",
+        "SourceLanguage": "CHS",
+        "TargetLanguage": "ENG",
+        "Url": "local",
+        "ImgTransKey": IMG_TRANS_KEY,
+        "CommitTime": commit_time,
+        "Sign": sign,
+        "NeedWatermark": 0,
+        "NeedRmUrl": 1,
+        "Qos": "LowLatency",
+    }
+    files = {}
+
+    if mode == "file-base64":
+        mediatype = "image/jpeg"
+        _, ext = os.path.splitext(os.path.basename(image_filepath))
+        if ext.lower() == ".png":
+            mediatype = "image/png"
+        with open(image_filepath, "rb") as image_file:
+            b64str = base64.b64encode(image_file.read()).decode("utf-8")
+            image = "data:{};base64,{}".format(mediatype, b64str)
+        payload["file-base64"] = image
+    elif mode == "file-stream":
+        filename = os.path.basename(image_filepath)
+        files["file-stream"] = (filename, open(image_filepath, 'rb'))
+    else:
+        raise Exception("unknown mode {}".format(mode))
+
+    result = requests.post(request_url, data=payload, files=files).json()
+    print(result)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser('Image translate tools')
+
+    parser.add_argument("--image", help="image path", type=str,
+                        default="static/smoke/image_translate/post2.png")
+    parser.add_argument("--mode", help="image mode", type=str,
+                        default="file-stream")
+    args = parser.parse_args()
+
+    translate_local_image(args.image, args.mode)
+```
+#### 5B.5 返回示例代码
+```
+Commit Time: 1714130244
+Sign: 4524ce70e52d7811542af3629b3bb8ce
+{
+   "Message":"ok",
+   "RequestId":"cc12bd9607ebde94",
+   "Data":{
+      "Url":"http://i.tosoiot.com/cc12bd9607ebde94/20240426-19-1727-8e01/50821ad4af445d0e-f.jpg",
+      "SslUrl":"https://i.tosoiot.com/cc12bd9607ebde94/20240426-19-1727-8e01/50821ad4af445d0e-f.jpg",
+      "RmUrl":"http://i.tosoiot.com/cc12bd9607ebde94/20240426-19-1727-8e01/50821ad4af445d0e-i.jpg",
+      "SslRmUrl":"https://i.tosoiot.com/cc12bd9607ebde94/20240426-19-1727-8e01/50821ad4af445d0e-i.jpg"
+   },
+   "Code":200
+}
+```
+
+
+
 ## 待添加...
 
 - 图片翻译接口
-  - 单次url请求
-  - 单次文件请求
+  - 单次url请求 ✔
+  - 单次文件请求 ✔ 
   - 批量请求
   - 翻译结果查询
     - 简单查询
