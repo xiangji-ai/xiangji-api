@@ -322,7 +322,7 @@ result=requests.get(request_url, data=payload).json()
 }
 ```
 
-### 5A 图片URL请求图片翻译接口 (单次)
+### 5A 图片翻译URL请求接口 (单次)
 
 #### 5A.1 访问接口
 - 请求地址: http://api.tosoiot.com
@@ -413,7 +413,7 @@ result = requests.get(request_url, data=payload).json()
 }
 ```
 
-### 5B. 图片翻译文件请求方式 (file-base64)
+### 5B. 图片翻译文件请求接口 (file-base64)
 
 #### 5B.1 访问接口
 - 请求地址: http://api2.tosoiot.com
@@ -539,6 +539,192 @@ Sign: 4524ce70e52d7811542af3629b3bb8ce
 }
 ```
 
+### 6. 图片翻译请求接口 (批量) 
+
+#### 6.1 访问接口
+- 请求地址: http://api.tosoiot.com
+- 请求类型: GET
+
+#### 6.2 请求参数
+| 字段名称                                             | 是否必选 | 类型      | 示例值                                        | 描述                                                               |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+|--------------------------------------------------|------|---------|--------------------------------------------|------------------------------------------------------------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Action                                           | 是    | String  | GetImageTranslateBatch                     | 服务类型，GetImageTranslateBatch: 图片翻译【批量】                            |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| SourceLanguage                                   | 是    | String  | CHS                                        | "来源语⾔，支持 中文(CHS/CHT)、英(ENG)                                      |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| 参考[语言列表]"                                        |      |         |                                            |                                                                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| TargetLanguage                                   | 是    | String  | KOR                                        | "目标语言                                                            |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| 参考[语言列表]"                                        |      |         |                                            |                                                                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Urls                                             | 是    | String  | https://xxxx/cib.jpg,http://xxxx/R3YAU.jpg | "图⽚地址，                                                           |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| 英文逗号分隔                                           |      |         |                                            |                                                                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| 注 ：文中url参数在传递时需要进行urlencode                      |      |         |                                            |                                                                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| 注：url 之间只能用 (,) 分隔。请勿在url之间加whitespace"          |      |         |                                            |                                                                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| ImgTransKey                                      | 是    | String  | 参照[访问控制]                                   | 图⽚翻译服务标识码                                                        |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| CommitTime                                       | 是    | String  | 1653229753                                 | 秒级时间戳                                                            |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Sign                                             | 是    | String  | 044a0bdea4128bb46aa59214ca821d6b           | 签名， 签名⽅法: md5(CommitTime + "_" + UserKey + "_" + ImgTransKey) 小写 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Sync                                             | 否    | Integer | 1                                          | "(非必需字段）默认 1，1=同步返回，2=异步返回 注意： 如果想使用查询 图片翻译批量查询 或 图片翻译批量查询明细 必须选择 Sync = 2" |      |         |                                            |                                                           
+
+#### 6.3 返回参数
+| 字段名称                                   | 类型      | 示例值              | 描述                    |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+|----------------------------------------|---------|------------------|-----------------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Code                                   | Integer | 200              | 状态码（详细列表见文末），200 代表正常 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Message                                | String  | ok               | 状态码的明文含义，正常           |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| RequestId                              | String  | 4f93f79edff764a7 | 请求的唯一 id              |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Data                                   | Json    |                  | 返回数据的 json 内容         |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| --Content                              |         |                  | "源图片翻译请求的响应内容，同步模式批量返回RequestId以及具体Url等信息（具体字段见下方样例）异步模式批量返回RequestId "|   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+
+
+#### 6.4 示例代码
+Python
+```
+import requests
+import hashlib
+import time
+
+USER_KEY = "YOUR USER KEY"
+IMG_TRANS_KEY = "YOUR IMG TRANS KEY"
+request_url="http://api.tosoiot.com"
+
+def calc_sign(commit_time) -> str:
+    # 签名⽅法: md5(CommitTime + "_" + UserKey + "_" + ImgTransKey) 小写
+    str_to_sign = "{}_{}_{}".format(commit_time, USER_KEY, IMG_TRANS_KEY)
+    _sign = hashlib.md5(str_to_sign.encode('utf-8')).hexdigest()
+    return _sign
+
+commit_time = int(time.time())
+sign = calc_sign(commit_time)
+
+payload = {
+    "Action": "GetImageTranslateBatch",
+    "SourceLanguage": "CHS",
+    "TargetLanguage": "ENG",
+    "Urls": "https://www-file.huawei.com/-/media/corp2020/home/banner/11/pura70-1920.jpg,https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/c66412360b4581510445386d6133ed4f.png?w=2452&h=920",
+    "ImgTransKey": IMG_TRANS_KEY,
+    "CommitTime": commit_time,
+    "Sign": sign,
+    "Sync": 1
+}
+
+result=requests.get(request_url, data=payload).json()
+```
+
+#### 6.5 返回例子
+```
+// 同步 - 响应JSON数据结构
+{
+   "Message":"ok",
+   "RequestId":"7e1b89618b30eaef", //图片翻译的RequestId
+   "Data":{
+      "Content":[
+         {
+            "RequestId":"815d2ff334e24096",
+            "Code":200,
+            "OriginUrl":"https://www-file.huawei.com/-/media/corp2020/home/banner/11/pura70-1920.jpg",
+            "Url":"http://i.tosoiot.com/815d2ff334e24096/20240506-18-2258-3e16/pura70-1920-f.jpg",
+            "SslUrl":"https://i.tosoiot.com/815d2ff334e24096/20240506-18-2258-3e16/pura70-1920-f.jpg",
+            "SourceLanguage":"CHS",
+            "TargetLanguage":"ENG"
+         },
+         {
+            "RequestId":"f921befa3beeba44", // 图片翻译的RequestId
+            "Code":200,
+            "OriginUrl":"https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/c66412360b4581510445386d6133ed4f.png?w=2452&h=920",
+            "Url":"http://i.tosoiot.com/20240506/1714990980/f921befa3beeba44/c66412360b4581510445386d6133ed4f_jn.jpg",
+            "SslUrl":"https://i.tosoiot.com/20240506/1714990980/f921befa3beeba44/c66412360b4581510445386d6133ed4f_jn.jpg",
+            "SourceLanguage":"CHS",
+            "TargetLanguage":"ENG"
+         }
+      ]
+   },
+   "Code":200
+}
+// 异步 - 响应JSON数据结构
+{
+   "Message":"ok",
+   "RequestId":"93fdbbe3979f0d0a", //此次请求的RequestId
+   "Data":{
+      "Content":[
+         "aa75af9bcf74317d", // 图片翻译的RequestId
+         "1b8ca36af791f83f" // 图片翻译的RequestId
+      ]
+   },
+   "Code":200
+}
+```
+
+### 7. 图片翻译查询接口 (批量) 
+
+#### 7A 图片翻译简单查询【异步】
+
+#### 7A.1 访问接口
+- 请求地址:  http://api.tosoiot.com/                
+- 请求类型: GET             
+
+#### 7A.2 请求参数
+| 字段名称       | 是否必选 | 类型     | 示例值                               | 描述                                           |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+|------------|------|--------|-----------------------------------|----------------------------------------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Action     | 是    | String | GetImageTranslateBatchResult      | GetImageTranslateBatchResult: 图片翻译【批量】【异步查询】 |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| RequestIds | 是    | String | 493e4277248a30d4,29c280ae35f067be |多个图片翻译的 RequestIds（而不是请求的 RequestId，参考 (响应示例)，按逗号分隔开响应参数:                
+
+#### 7A.3 返回参数
+| 字段名称        | 类型      | 示例值                                                 | 描述                                     |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+|-------------|---------|-----------------------------------------------------|----------------------------------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Code        | Integer | 200                                                 | 状态码（详细列表见文末），200 代表正常                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Message     | String  | ok                                                  | 状态码的明文含义，正常                            |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| RequestId   | String  | 4f93f79edff764a7                                    | 请求的唯一 id                               |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| Data        | Json    |                                                     | 返回数据的 json 内容                          |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| --OriginUrl | String  | http://localhost/path/123456.jpg                    | 源图片地址                                  |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| -- Url      | String  | http://i.tosoiot.com/r/5b135a6003a3075d/f-xxxx.jpg  | 翻译后的目标图片地址（图片地址的默认有效期为80天，如需长时存储请联系客服） |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| -- SsUrl    | String  | https://i.tosoiot.com/r/5b135a6003a3075d/f-xxxx.jpg | 翻译后的目标图片 https 地址                      |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| -- RmUrl    | String  | http://i.tosoiot.com/r/5b135a6003a3075d/ixx-xx.jpg  | 去除文字后的目标图片地址                           |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
+| -- SsRmUrl  | String  | https://i.tosoiot.com/r/5b135a6003a3075d/i-xxxx.jpg | 去除文字后的目标图片 https 地址                    |
+
+#### 7A.4 示例代码
+请按照异步请求返回 "Data"{"Content": } 表格的 requestId 填 "requestIds"
+Python
+```
+import requests
+request_url="http://api.tosoiot.com"
+
+payload = {
+    "Action": "GetImageTranslateBatchResult",
+    "RequestIds": "aa75af9bcf74317d,1b8ca36af791f83f" 
+}
+result=requests.get(request_url, data=payload).json()
+```
+
+#### 7A.5 返回例子
+```
+// 响应JSON数据结构
+{
+   "Message":"ok",
+   "RequestId":"60caefe089c5cd60",
+   "Data":{
+      "Content":{
+         "326c760d5939e7f7":{
+         // 图片翻译的RequestId
+            "RequestId":"326c760d5939e7f7",
+            "Code":200,
+            "OriginUrl":"https://www-file.huawei.com/-/media/corp2020/home/banner/11/pura70-1920.jpg",
+            "Url":"http://i.tosoiot.com/326c760d5939e7f7/20240507-14-0936-9b1a/pura70-1920-f.jpg",
+            "SslUrl":"https://i.tosoiot.com/326c760d5939e7f7/20240507-14-0936-9b1a/pura70-1920-f.jpg",
+            "SourceLanguage":"CHS",
+            "TargetLanguage":"ENG"
+         },
+         "43a03fdcaf5b7163":{
+         // 图片翻译的RequestId
+            "RequestId":"43a03fdcaf5b7163",
+            "Code":200,
+            "OriginUrl":"https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/c66412360b4581510445386d6133ed4f.png?w=2452&h=920",
+            "Url":"http://i.tosoiot.com/20240507/1715062179/43a03fdcaf5b7163/c66412360b4581510445386d6133ed4f_jn.jpg",
+            "SslUrl":"https://i.tosoiot.com/20240507/1715062179/43a03fdcaf5b7163/c66412360b4581510445386d6133ed4f_jn.jpg",
+            "SourceLanguage":"CHS",
+            "TargetLanguage":"ENG"
+         }
+      }
+   },
+   "Code":200
+}
+```
+
 
 
 ## 待添加...
@@ -546,9 +732,9 @@ Sign: 4524ce70e52d7811542af3629b3bb8ce
 - 图片翻译接口
   - 单次url请求 ✔
   - 单次文件请求 ✔ 
-  - 批量请求
+  - 批量请求 ✔ 
   - 翻译结果查询
-    - 简单查询
+    - 简单查询 ✔ 
     - 明细查询
   - 图片精修iframe对接
 - 视频翻译接口 象寄视频翻译对接文档
