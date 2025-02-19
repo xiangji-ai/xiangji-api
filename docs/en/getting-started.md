@@ -1,4 +1,12 @@
-# Quickstart
+---
+title: Getting Started
+description:
+keywords:
+  - API
+  - Authentication
+date: 2025-02-19
+order: 0
+---
 
 The Piclaza API provides a simple interface for image/video processing.
 

@@ -1,8 +1,17 @@
-# Image Translation API
+---
+title: 图片翻译
+description:
+keywords:
+  - API
+  - Image Translation
+  - Image Translation API
+date: 2025-02-19
+order: 1
+---
 
-## Translate Image
+## 图片翻译
 
-Recognize and translate the text in an image, directly return the translated image where the text is translated into the specified language, while preserving the original image's layout and style.
+识别和翻译图片中的文字，直接得到翻译结果图片，其中的文字被翻译成指定的语言，同时保留原图的排版和样式。
 
 `POST` https://api.piclaza.com/task/v1/image/translate
 
@@ -13,59 +22,59 @@ Recognize and translate the text in an image, directly return the translated ima
 ---
 
 **image_url** <font color=Grey>string</font> <font color=LightCoral>required[[1]](#note1)</font>  
-Image link
+图片链接
 
 ---
 
 **image_urls** <font color=Grey>array of string</font> <font color=LightCoral>required[[1]](#note1)</font>  
-List of image link
+图片链接列表
 
 ---
 
 **image_file_b64** <font color=Grey>string</font> <font color=LightCoral>required[[1]](#note1)</font>  
-Image file content, [base64 encoding](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#encoding_data_into_base64_format) (format: `data:[<mediatype>][;base64],<data>`)
+图片文件内容，[base64 编码](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data#encoding_data_into_base64_format)格式 (format: `data:[<mediatype>][;base64],<data>`)
 
 ---
 
 **image_name** <font color=Grey>string</font>  
-Corresponding file name of image_file_b64
+image_file_b64 对应的文件名
 
 ---
 
 **source_language** <font color=Grey>string</font> <font color=LightCoral>required</font>  
-Source language. Currently support:
-* `CHS`: Chinese (Simplified)
-* `CHT`: Chinese (Traditional)
-* `ENG`: English
-* `ESP`: Spanish
-* `JPN`: Japanese
-* `KOR`: Korean
+源语言，目前支持
+* `CHS`: 中文(简体)
+* `CHT`: 中文(繁体)
+* `ENG`: 英语
+* `ESP`: 西班牙语
+* `JPN`: 日语
+* `KOR`: 韩语
 
 ---
 
 **target_language** <font color=Grey>string</font> <font color=LightCoral>required</font>  
-Target language. See [Supported languages](Notes.md#supported-languages) for more information.
+目标语言，支持语言列表见[支持语言](notes.md#支持语言)
 
 ---
 
 **translation_vendor** <font color=Grey>string</font>  
-The text translation engine, currently supported:
-* `Google`: (Default) Widely used in multiple languages around the world
-* `Papago`: Good Korean translation
-* `DeepL`: Available in [multiple languages](https://developers.deepl.com/docs/resources/supported-languages), excellent in slang and dialect translation
-* `ChatGPT`: Use the best Large Language Model(gpt-4o), with accurate translation
-* `Aliyun`: Suitable for Chinese translation
+使用的文本翻译引擎，目前支持
+* `Google`: (默认) 广泛适用全球多种语言 
+* `Papago`: 韩语翻译效果好
+* `DeepL`: 适用[多种语言](https://developers.deepl.com/docs/resources/supported-languages)，在俚语、方言翻译方面表现优异
+* `ChatGPT`: 使用目前最好的大语言模型(gpt-4o)，翻译准确
+* `Aliyun`: 适合中文翻译
 
 ---
 
 **qos** <font color=Grey>string</font>  
-Quality of Service, currently supported:
-* `BestQuality`: (Default) Preference for good translation quality
-* `LowLatency`: Preference for fast translation speed
+服务质量等级，目前支持
+* `BestQuality`: (默认) 注重翻译效果
+* `LowLatency`: 注重翻译速度
 
 ---
 
-> <span id="note1">[1] image_url/image_urls/image_file_b64 are three forms of input image parameters, and one of the three parameters should be set</span>
+> <span id="note1">[1] image_url/image_urls/image_file_b64 是输入图片参数的三种形式，三个参数选择一个</span>
 
 Example
 
@@ -85,17 +94,17 @@ Example
 ---
 
 **code** <font color=grey>integer</font>  
-Status code, non-0 indicates an error. See [Response status code](Notes.md#response-status-code) for more information
+状态码，非 0 表示错误，具体含义见[响应状态码说明](notes.md#响应状态码说明)
 
 ---
 
 **message** <font color=grey>string</font>  
-Error message
+错误信息
 
 ---
 
 **data** <font color=grey>map</font>  
-Returned data
+返回数据
 > **results** <font color=grey>array of [Task](#the-task-object) object</font>
 
 ---
@@ -122,28 +131,27 @@ Example
 ---
 
 **code** <font color=grey>integer</font>  
-Status code, non-0 indicates an error. See [Response status code](Notes.md#response-status-code) for more information
+状态码，非 0 表示错误，具体含义见[响应状态码说明](notes.md#响应状态码说明)
 
 ---
 
 **message** <font color=grey>string</font>  
-Error message
+错误信息
 
 ---
 
 **task_id** <font color=grey>string</font>  
-Task id
+任务 id
 
 ---
 
 **type** <font color=grey>string</font>  
-Task type
+任务类型
 
 ---
 
 
-## Query the results of image translation
-
+## 查询图片翻译结果
 
 `POST` https://api.piclaza.com/task/v1/image/translate/result
 
@@ -153,10 +161,10 @@ Task type
 
 - - -
 **task_ids** <font color=Grey>string</font> <font color=LightCoral>required</font> \
-List of task ids
+任务 id 列表
 - - -
 **verbose** <font color=Grey>boolean</font> \
-Return detailed OCR data or not, default is false.
+是否返回详细的 OCR 数据，默认 false
 - - -
 
 Example
@@ -172,23 +180,17 @@ Example
 
 `Content-Type: application/json`
 
----
-
+- - -
 **code** <font color=grey>integer</font>  
-Status code, non-0 indicates an error. See [Response status code](Notes.md#response-status-code) for more information
-
----
-
+状态码，非 0 表示错误，具体含义见[响应状态码说明](notes.md#响应状态码说明)
+- - -
 **message** <font color=grey>string</font>  
-Error message
-
----
-
+错误信息
+- - -
 **data** <font color=grey>object</font>  
-Returned data
+返回数据
 > **results** <font color=grey>array of [Image Translatioin Result](#the-image-translation-result-object) object</font>  
-
----
+- - -
 
 Example
 
@@ -245,58 +247,58 @@ Example
 ---
 
 **code** <font color=grey>integer</font>  
-Status code, non-0 indicates an error. See [Response status code](Notes.md#response-status-code) for more information
+状态码，非 0 表示错误，具体含义见[响应状态码说明](notes.md#响应状态码说明)
 
 ---
 
 **message** <font color=grey>string</font>  
-Error message
+错误信息
 
 ---
 
 **task_id** <font color=grey>string</font>  
-Task id
+任务 id
 
 ---
 
 **user_id** <font color=grey>integer</font>  
-User id
+用户 id
 
 ---
 
 **type** <font color=grey>string</font>  
-Task type
+任务类型
 
 ---
 
 **status** <font color=grey>string</font>  
-Task status (ok/running/failed)
+任务状态 (ok/running/failed)
 
 ---
 
 **original_image** <font color=grey>string</font>  
-Original image link
+原图链接
 
 ---
 
 **translated_image** <font color=grey>string</font>  
-Translated image link
+翻译结果图片链接
 
 ---
 
 **text_removed_image** <font color=grey>string</font>  
-Text removed image link
+去除文字的图片链接
 
 ---
 
 **ocr** <font color=grey>list of [Image OCR](#the-image-ocr-object) object</font>  
-List of recognized text information
+识别到的文本信息列表
 
 ---
 
 ### The Image OCR Object
 
-Coordinates representation: the upper left corner of the image is (0, 0); the x-axis is from left to right; the y-axis is from top to bottom
+数据中涉及坐标表示: 图片左上角为 (0, 0) 点; x 轴从左向右; y 轴从上向下
 
 ```
 (0,0)---x--->
@@ -311,62 +313,62 @@ Coordinates representation: the upper left corner of the image is (0, 0); the x-
 ---
 
 **id** <font color=grey>integer</font>  
-id
+编号
 
 ---
 
 **source** <font color=grey>string</font>  
-Recognized original text
+识别到的原文
 
 ---
 
 **target** <font color=grey>string</font>  
-Translated text
+译文
 
 ---
 
 **ori_bounding_box** <font color=grey>string</font>  
-Original text box border
+原文文本框边界
 
 ---
 
 **bounding_box** <font color=grey>string</font>  
-Translated text box border
+译文文本框边界
 
 ---
 
 **font_size** <font color=grey>integer</font>  
-Text font size
+文字大小
 
 ---
 
 **direction** <font color=grey>integer</font>  
-Text writing direction (h: horizontal, v: vertical)
-Some languages ​​have a tradition of vertical writing, such as Chinese and Japanese
+文字书写方向 (h: 横向, v: 纵向)  
+部分语言有纵向书写的习惯，比如中文、日文
 
 ---
 
 **color** <font color=grey>string</font>  
-Text color (RGB)
+文字颜色 (RGB)
 
 ---
 
 **stroke_color** <font color=grey>string</font>  
-Text stroke color (RGB)
+文字描边颜色 (RGB)
 
 ---
 
 **line_count** <font color=grey>integer</font>  
-Line count of text
+行数
 
 ---
 
 **angle** <font color=grey>integer</font>  
-Rotation angle (clockwise rotation from the positive direction of the x-axis, default 0)
+旋转角度 (从x轴正方向顺时针旋转的角度, 默认0)
 
 ---
 
 **align** <font color=grey>string</font>  
-Alignment (left/right/center)
+对齐方式 (left/right/center)
 
 ---
