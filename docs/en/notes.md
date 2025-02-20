@@ -3,7 +3,6 @@ title: Notes
 description:
 keywords:
   - API
-order: 2
 ---
 
 ## Response status code
